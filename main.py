@@ -109,7 +109,7 @@ def upload_file(window):
         image=selected_img,
         command=lambda: create_watermark_preview(window, filename),
     )
-    image_button.grid(column=1, row=5, columnspan=3)
+    image_button.grid(column=1, row=7, columnspan=4)
 
 
 def create_watermark_preview(window, filename):
@@ -146,7 +146,7 @@ def create_watermark_preview(window, filename):
         highlightthickness=0,
         command=lambda: save_image(new_img, filename),
     )
-    save_button.grid(column=1, row=6, pady=20)
+    save_button.grid(row=8, column=1, pady=20, columnspan=4)
 
 
 def save_image(img, filename):
@@ -155,7 +155,7 @@ def save_image(img, filename):
     save_button = tk.Button(
         text="Save Image", highlightthickness=0, state="disabled", fg="red"
     )
-    save_button.grid(column=1, row=4, pady=20)
+    save_button.grid(row=8, column=1, pady=20, columnspan=3)
     tk.messagebox.showinfo(title="Success!", message="Picture watermarked and saved!")
 
 
@@ -193,6 +193,13 @@ def batch_upload():
         )
         return
 
+    # Make a directory if it doesn't exist
+    directory = "./watermark"
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+    else:
+        print("path exists")
+
     for file in batch_files:
         # SAME AS CREATE _ WATERMAKR PREVIEW DRY THIS LATER
 
@@ -222,7 +229,14 @@ def batch_upload():
 
         # FKKK
         f, e = os.path.splitext(file)
-        new_img.save(f"{f}_watermarked{e}")
+        show_filename = ""
+        for i in range(len(f) - 1, -1, -1):
+            char = f[i]
+            if char == "/" or char == "\\":
+                break
+            else:
+                show_filename = char + show_filename
+        new_img.save(f"{directory}/{show_filename}_watermarked{e}")
 
     tk.messagebox.showinfo(
         title="Success", message="All pictures watermarked and saved!"
@@ -244,73 +258,77 @@ font = FONT_NAME, FONT_SIZE
 THEME_COLOR = "#375362"
 window = tk.Tk()
 window.title("WaterMark")
-window.geometry("500x630")
+window.config(padx=20)
+window.geometry("700x830")
 logofilename = ""
 
 # logo image
-canvas = tk.Canvas(width=500, height=300, highlightthickness=0)
+canvas = tk.Canvas(width=450, height=300, highlightthickness=0)
 water_image = tk.PhotoImage(file="./new.png")
 canvas.create_image(250, 150, image=water_image)
-canvas.grid(column=1, row=0, columnspan=3)
+canvas.grid(row=0, column=1, columnspan=4)
 
-
-# Input for logo and input size
-logosize_label = tk.Label(
-    text="Logo Size (default=175):", font=(FONT_NAME, FONT_SIZE), highlightthickness=0
-)
-logosize_label.grid(column=1, row=1)
-logosize_input = tk.Entry(width=10, highlightthickness=0)
-logosize_input.grid(column=2, row=1)
-
-# Input for text and input size
-textsize_label = tk.Label(
-    text="Text Size (default=35): ", font=(FONT_NAME, FONT_SIZE), highlightthickness=0
-)
-textsize_label.grid(column=1, row=2)
-textsize_input = tk.Entry(width=10, highlightthickness=0)
-textsize_input.grid(column=2, row=2)
 
 # Upload logo filename
 logofile_label = tk.Label(text="Upload your logo:", font=font, highlightthickness=0)
-logofile_label.grid(row=3, column=1)
+logofile_label.grid(row=1, column=1)
 logofile_button = tk.Button(
     text="Upload", font=font, highlightthickness=0, command=lambda: upload_logo()
 )
-logofile_button.grid(row=3, column=2)
-
+logofile_button.grid(row=1, column=2)
 
 # WATERMARK TEXT
 watermark_label = tk.Label(text="WaterMark text:", font=font, highlightthickness=0)
-watermark_label.grid(row=4, column=1)
+watermark_label.grid(row=2, column=1)
 watermark_input = tk.Entry(width=20, highlightthickness=0)
-watermark_input.grid(row=4, column=2)
+watermark_input.grid(row=2, column=2, pady=20)
 
 # Ask for WATERMARK color
 chosen_colour = tk.StringVar(window)
 chosen_colour.set("Select a colour")
 options = ["White", "Black"]
 watermark_drop = tk.OptionMenu(window, chosen_colour, *options)
-watermark_drop.grid(row=4, column=3)
+watermark_drop.grid(row=2, column=3, padx=10)
 
-# BATCH WATERMARK
-batch_watermark_button = tk.Button(
-    text="Batch Upload", font=font, command=lambda: batch_upload()
+# Input for logo and input size
+logosize_label = tk.Label(
+    text="Logo Size (default=175):", font=(FONT_NAME, FONT_SIZE), highlightthickness=0
 )
-batch_watermark_button.grid(row=6, column=1)
+logosize_label.grid(row=3, column=1)
+logosize_input = tk.Entry(width=10, highlightthickness=0)
+logosize_input.grid(row=3, column=2)
+
+
+# Input for text and input size
+textsize_label = tk.Label(
+    text="Text Size (default=35): ", font=(FONT_NAME, FONT_SIZE), highlightthickness=0
+)
+textsize_label.grid(row=4, column=1)
+textsize_input = tk.Entry(width=10, highlightthickness=0)
+textsize_input.grid(row=4, column=2)
 
 # Ask to upload file
 title = tk.Label(
-    text="Upload your file here", font=(FONT_NAME, FONT_SIZE), highlightthickness=0
+    text="Upload your image here", font=(FONT_NAME, FONT_SIZE), highlightthickness=0
 )
-title.grid(column=1, row=5, columnspan=3)
+title.grid(row=5, column=1, columnspan=4, pady=10)
+
+
+# BATCH WATERMARK
+batch_watermark_button = tk.Button(
+    text="Batch Upload", font=font, command=lambda: batch_upload(), width=20
+)
+batch_watermark_button.grid(row=6, column=0, columnspan=2)
 
 # upload button
 up_button = tk.Button(
-    text="Upload File",
+    text="Upload Image",
     highlightthickness=0,
+    font=font,
     command=lambda: upload_file(window),
+    width=20,
 )
 
-up_button.grid(column=1, row=6, pady=20, columnspan=3)
+up_button.grid(row=6, column=2, pady=20, columnspan=2)
 
 window.mainloop()
