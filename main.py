@@ -11,20 +11,27 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 
 # create an image object
 class WaterMark:
-    def __init__(self, background, logo):
+    def __init__(self, background, logo, watermark_text):
 
         self.background = Image.open(background)
-        self.logo = Image.open(logo)
+        try:
+            self.logo = Image.open(logo)
+        # no logo provided
+        except AttributeError:
+            self.logo = ""
 
         self.background_width, self.background_height = self.background.size
+        self.logosize = 175
+        self.textsize = 35
+        self.text = watermark_text
+        self.textcolour = "#FFFFFF"
 
     def draw_text(self):
 
         draw = ImageDraw.Draw(self.background)
-        text = "https://davidcao.xyz"
 
-        font = ImageFont.truetype("arial.ttf", 35)
-        left, top, right, bottom = font.getbbox(text)
+        font = ImageFont.truetype("arial.ttf", self.textsize)
+        left, top, right, bottom = font.getbbox(self.text)
 
         textwidth = right - left
         textheight = bottom - top
@@ -34,29 +41,49 @@ class WaterMark:
         x = self.background_width - textwidth - margin
         y = self.background_height - textheight - margin
 
-        draw.text((x, y), text, font=font)
+        draw.text((x, y), self.text, font=font, fill=self.textcolour)
 
     def paste_logo(self):
         # Paste self.logo
         self.logowidth, self.logoheight = self.logo.size
 
         # scale the self.logo
-        scale = 175
+        scale = self.logosize
         new_logowidth = int(self.logowidth / self.logowidth * scale)
         new_logoheight = int(self.logoheight / self.logowidth * scale)
         self.logo = self.logo.resize((new_logowidth, new_logoheight))
 
-        self.background.paste(self.logo, (0, 30), self.logo)
+        # In case the image logo is not transparent
+        try:
+            self.background.paste(self.logo, (0, 30), self.logo)
+        except ValueError:
+            self.background.paste(self.logo, (0, 30))
 
     def show(self):
         self.draw_text()
-        self.paste_logo()
+        if self.logo:
+            self.paste_logo()
         self.background.show()
 
     def get_watermark_image(self):
         self.draw_text()
-        self.paste_logo()
+        if self.logo:
+            self.paste_logo()
         return self.background
+
+    def set_logosize(self, size):
+        if size:
+            self.logosize = int(size)
+
+    def set_textsize(self, size):
+        if size:
+            self.textsize = int(size)
+
+    def set_textcolour(self, chosen_colour):
+        if chosen_colour == "Black":
+            self.textcolour = "#000000"
+        elif chosen_colour == "White":
+            self.textcolour = "#FFFFFF"
 
 
 # ======================================================================== #
@@ -82,11 +109,35 @@ def upload_file(window):
         image=selected_img,
         command=lambda: create_watermark_preview(window, filename),
     )
-    image_button.grid(column=1, row=3)
+    image_button.grid(column=1, row=5, columnspan=3)
 
 
 def create_watermark_preview(window, filename):
-    water = WaterMark(filename, "./cowlogo.png")
+
+    watermark_text = watermark_input.get()
+    water = WaterMark(filename, logofilename, watermark_text)
+    water.set_textcolour(chosen_colour.get())
+
+    logosize = logosize_input.get()
+    textsize = textsize_input.get()
+    if logosize:
+        try:
+            logosize = int(logosize_input.get())
+        # If the input is not a valid integer
+        except ValueError:
+            tk.messagebox.showerror(
+                title="Error!", message="That is not a valid logo size!"
+            )
+
+    if textsize:
+        try:
+            textsize = int(textsize_input.get())
+        except ValueError:
+            tk.messagebox.showerror(
+                title="Error", message="That is not a valid text size!"
+            )
+    water.set_logosize(logosize)
+    water.set_textsize(textsize)
     new_img = water.get_watermark_image()
     new_img.show()
 
@@ -95,7 +146,7 @@ def create_watermark_preview(window, filename):
         highlightthickness=0,
         command=lambda: save_image(new_img, filename),
     )
-    save_button.grid(column=1, row=4, pady=20)
+    save_button.grid(column=1, row=6, pady=20)
 
 
 def save_image(img, filename):
@@ -108,6 +159,25 @@ def save_image(img, filename):
     tk.messagebox.showinfo(title="Success!", message="Picture watermarked and saved!")
 
 
+def upload_logo():
+    global logofilename
+    f_types = [
+        ("PNG Files", "*.png"),
+        ("Jpg Files", "*.jpg"),
+    ]  # type of files to select
+    logofilename = filedialog.askopenfilename(filetypes=f_types)
+
+    show_filename = ""
+    for i in range(len(logofilename) - 1, -1, -1):
+        char = logofilename[i]
+        if char == "/" or char == "\\":
+            break
+        else:
+            show_filename = char + show_filename
+
+    logofile_label.config(text=show_filename)
+
+
 # =================================
 # TKINTER UI
 
@@ -118,22 +188,64 @@ from tkinter import filedialog
 FONT_NAME = "Courier"
 FONT_SIZE = 15
 
+font = FONT_NAME, FONT_SIZE
+
 THEME_COLOR = "#375362"
 window = tk.Tk()
 window.title("WaterMark")
 window.geometry("500x630")
+logofilename = ""
 
 # logo image
 canvas = tk.Canvas(width=500, height=300, highlightthickness=0)
 water_image = tk.PhotoImage(file="./new.png")
 canvas.create_image(250, 150, image=water_image)
-canvas.grid(column=1, row=0)
+canvas.grid(column=1, row=0, columnspan=3)
+
+
+# Input for logo and input size
+logosize_label = tk.Label(
+    text="Logo Size (default=175):", font=(FONT_NAME, FONT_SIZE), highlightthickness=0
+)
+logosize_label.grid(column=1, row=1)
+logosize_input = tk.Entry(width=10, highlightthickness=0)
+logosize_input.grid(column=2, row=1)
+
+# Input for text and input size
+textsize_label = tk.Label(
+    text="Text Size (default=35): ", font=(FONT_NAME, FONT_SIZE), highlightthickness=0
+)
+textsize_label.grid(column=1, row=2)
+textsize_input = tk.Entry(width=10, highlightthickness=0)
+textsize_input.grid(column=2, row=2)
+
+# Upload logo filename
+logofile_label = tk.Label(text="Upload your logo:", font=font, highlightthickness=0)
+logofile_label.grid(row=3, column=1)
+logofile_button = tk.Button(
+    text="Upload", font=font, highlightthickness=0, command=lambda: upload_logo()
+)
+logofile_button.grid(row=3, column=2)
+
+
+# WATERMARK TEXT
+watermark_label = tk.Label(text="WaterMark text:", font=font, highlightthickness=0)
+watermark_label.grid(row=4, column=1)
+watermark_input = tk.Entry(width=20, highlightthickness=0)
+watermark_input.grid(row=4, column=2)
+
+# Ask for WATERMARK color
+chosen_colour = tk.StringVar(window)
+chosen_colour.set("Select a colour")
+options = ["White", "Black"]
+watermark_drop = tk.OptionMenu(window, chosen_colour, *options)
+watermark_drop.grid(row=4, column=3)
 
 # Ask to upload file
 title = tk.Label(
     text="Upload your file here", font=(FONT_NAME, FONT_SIZE), highlightthickness=0
 )
-title.grid(column=1, row=1)
+title.grid(column=1, row=5, columnspan=3)
 
 # upload button
 up_button = tk.Button(
@@ -142,6 +254,6 @@ up_button = tk.Button(
     command=lambda: upload_file(window),
 )
 
-up_button.grid(column=1, row=2, pady=20)
+up_button.grid(column=1, row=6, pady=20, columnspan=3)
 
 window.mainloop()
