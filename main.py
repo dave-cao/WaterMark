@@ -178,6 +178,57 @@ def upload_logo():
     logofile_label.config(text=show_filename)
 
 
+def batch_upload():
+    f_types = [
+        ("PNG Files", "*.png"),
+        ("Jpg Files", "*.jpg"),
+    ]  # type of files to select
+    batch_files = filedialog.askopenfilename(multiple=True, filetypes=f_types)
+
+    watermark_text = watermark_input.get()
+    if not logofilename and not watermark_text:
+        tk.messagebox.showerror(
+            title="Error",
+            message="There is no logo or watermark text! If you batch then nothing will change!",
+        )
+        return
+
+    for file in batch_files:
+        # SAME AS CREATE _ WATERMAKR PREVIEW DRY THIS LATER
+
+        water = WaterMark(file, logofilename, watermark_text)
+        water.set_textcolour(chosen_colour.get())
+        logosize = logosize_input.get()
+        textsize = textsize_input.get()
+        if logosize:
+            try:
+                logosize = int(logosize_input.get())
+            # If the input is not a valid integer
+            except ValueError:
+                tk.messagebox.showerror(
+                    title="Error!", message="That is not a valid logo size!"
+                )
+
+        if textsize:
+            try:
+                textsize = int(textsize_input.get())
+            except ValueError:
+                tk.messagebox.showerror(
+                    title="Error", message="That is not a valid text size!"
+                )
+        water.set_logosize(logosize)
+        water.set_textsize(textsize)
+        new_img = water.get_watermark_image()
+
+        # FKKK
+        f, e = os.path.splitext(file)
+        new_img.save(f"{f}_watermarked{e}")
+
+    tk.messagebox.showinfo(
+        title="Success", message="All pictures watermarked and saved!"
+    )
+
+
 # =================================
 # TKINTER UI
 
@@ -240,6 +291,12 @@ chosen_colour.set("Select a colour")
 options = ["White", "Black"]
 watermark_drop = tk.OptionMenu(window, chosen_colour, *options)
 watermark_drop.grid(row=4, column=3)
+
+# BATCH WATERMARK
+batch_watermark_button = tk.Button(
+    text="Batch Upload", font=font, command=lambda: batch_upload()
+)
+batch_watermark_button.grid(row=6, column=1)
 
 # Ask to upload file
 title = tk.Label(
