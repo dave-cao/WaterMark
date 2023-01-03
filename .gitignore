@@ -1,2 +1,4 @@
 Wallpapers/
 __pycache__/
+.env
+.venv/
