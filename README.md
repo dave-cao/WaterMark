@@ -4,9 +4,9 @@
 
 <br>
 
-![USAGE GIF OR PIC TO CAPTURE ATTENTION](./assets/watermark.gif)
+![Watermark Gif](./assets/watermark.gif)
 
-- [Live](youtube video) demonstration video.
+- [Live](https://youtu.be/4HTlo4uVAJs) demonstration video.
 - [Demo](https://replit.com/@KingCao/WaterMark?v=1) the Project.
 
 
@@ -81,7 +81,7 @@ ctl + c
 # or click the "x" button.
 ```
 
-_For a more comprehensive example of using this application, refer to this [video](example video here)_
+_For a more comprehensive example of using this application, refer to this [video](https://youtu.be/4HTlo4uVAJs)_
 
 
 
