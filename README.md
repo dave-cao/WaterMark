@@ -68,7 +68,7 @@ python3 main.py
 
 4. Now upload the image you want to watermark. If it's only a single image then click `Upload Image`. If it's multiple, you can go for the `Batch Upload`.
 
-    - If you go for the `Upload Image` option, you will be presented with a clickable image your upload. Click the image and a preview of your watermark will be presented to you.
+    - If you go for the `Upload Image` option, you will be presented with a clickable image of your upload. Click the image and a preview of your watermark will be presented to you.
         - ![Image preview eg](img/image1.png)
     - If you want to save your watermark, another button should appear at the button. Simply click it and your image will be saved suffixed with `_watermarked`.
         - ![save button](img/image2.png)
@@ -90,7 +90,7 @@ _For a more comprehensive example of using this application, refer to this [vide
 ## Roadmap
 
 Currently there is no future plans for this project. Some future ideas that I had while thinking of this project though:
-1. Where it stands, the logo goes on the top left and the text goes on the bottom left. Perhaps in the future I can build an option to change the positions.
+1. Where it stands, the logo goes on the top left and the text goes on the bottom right. Perhaps in the future I can build an option to change the positions.
 2. Only two text colours available, "White" and "Black".
 
 
