@@ -1,3 +1,12 @@
+"""
+This program is meant to watermark your images with a GUI.
+
+Caveats:
+    - Logo goes on the top left and text goes on the bottom right. You can fork the
+        code and change this however!
+    - Only two text colours available at the moment, "White" and "Black"
+
+"""
 import os
 import tkinter as tk
 from tkinter import filedialog
